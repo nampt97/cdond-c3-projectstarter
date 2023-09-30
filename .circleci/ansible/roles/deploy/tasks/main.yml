@@ -16,10 +16,7 @@
   become: yes
   shell:
     cmd: |
-      sudo apt-get install npm
-      sudo npm install -g pm2
       cd /home/ubuntu/backend
       npm install
-      pm2 stop backend
-      pm2 delete backend
+      pm2 stop default
       pm2 start npm -- start
