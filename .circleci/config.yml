@@ -79,7 +79,7 @@ jobs:
             cd frontend
             npm install
             ## npm install oauth-sign@^0.9.0
-            npm audit --audit-level=critical
+            npm audit fix --audit-level=critical --force
       - slack/notify:
           event: fail
           template: basic_fail_1
@@ -101,6 +101,47 @@ jobs:
       - slack/notify:
           event: fail
           template: basic_fail_1
+  
+    deploy-infrastructure:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      # Checkout code from git
+      - checkout
+      - run: yum install -y tar gzip
+
+      - run:
+          name: Ensure back-end infrastructure exists
+          command: |
+            aws cloudformation deploy \
+              --template-file .circleci/files/backend.yml \
+              --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
+              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}" \
+              --tags project=udapeople
+
+      - run:
+          name: Ensure front-end infrastructure exist
+          command: |
+            aws cloudformation deploy \
+              --template-file .circleci/files/frontend.yml \
+              --tags project=your-tag \
+              --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}" \
+              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"  
+  
+      - run:
+          name: Add back-end ip to ansible inventory
+          command: |
+            echo $(aws ec2 describe-instances \
+            --query 'Reservations[*].Instances[*].PublicDnsName' \
+            --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" \
+            --output text) >> ~/project/.circleci/ansible/inventory.txt
+            cat ~/project/.circleci/ansible/inventory.txt
+
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - project/.circleci/ansible/inventory.txt   
+      - destroy-environment
 
 workflows:
   default:
