@@ -15,6 +15,7 @@
     npm i
 
 - name: "Start backend application with PM2"
+  become: true
   shell: |
     cd ~/backend-app/
     pm2 stop default
