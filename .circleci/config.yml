@@ -348,7 +348,7 @@ jobs:
           name: Backend smoke test.
           command: |
             export BACKEND_PUBLIC_IP=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" --query 'Reservations[*].Instances[*].PublicDnsName' --output text)
-            export API_URL="http://${BACKEND_PUBLIC_IP}:3030"
+            export API_URL="https://${BACKEND_PUBLIC_IP}:3030"
             echo "${API_URL}"  #   curl -s ${API_URL}/api/status -v 
             if curl -s ${API_URL}/api/status | grep "ok"
             then
@@ -368,6 +368,8 @@ jobs:
             else
               exit 1
             fi
+      - revert-migrations
+      - destroy-environment 
 
   cloudfront-update:
     docker:
@@ -401,6 +403,8 @@ jobs:
                   --stack-name InitialStackUdapeoplev2 \
                   --parameter-overrides WorkflowID="${CIRCLE_WORKFLOW_ID:0:7}" \
                   --tags project=udapeople 
+      - revert-migrations
+      - destroy-environment 
 
   cleanup:
     docker:
@@ -425,6 +429,8 @@ jobs:
             else
                 echo 'Cannot cleanup'
             fi
+      - revert-migrations
+      - destroy-environment 
 
 workflows:
   default:
