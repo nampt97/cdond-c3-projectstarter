@@ -35,7 +35,7 @@ commands:
             cd backend
             npm install
             npm run migrations:revert
-            
+
 jobs:
   build-frontend:
     docker:
@@ -368,8 +368,39 @@ jobs:
             else
               exit 1
             fi
-      - destroy-environment
-      - revert-migrations   
+
+  cloudfront-update:
+    docker:
+      - image: python:3.7-alpine3.11
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Install dependencies
+          command: |
+            apk add --no-cache \
+              curl \
+              python3 \
+              py3-pip \
+              && pip3 install --upgrade pip \
+              && pip3 install \
+              awscli \
+              && rm -rf /var/cache/apk/*
+      - run:
+          name: Update cloudfront distribution
+          command: |
+            aws cloudformation list-exports --query "Exports[?Name==\`WorkflowID\`].Value" --no-paginate --output text > ~/textfile.txt
+
+            echo "The value of OLD_WORKFLOW_ID:"
+
+            cat ~/textfile.txt
+
+            aws cloudformation deploy \
+                  --template-file .circleci/files/cloudfront.yml \
+                  --stack-name InitialStackUdapeoplev2 \
+                  --parameter-overrides WorkflowID="${CIRCLE_WORKFLOW_ID:0:7}" \
+                  --tags project=udapeople 
 
 workflows:
   default:
@@ -399,3 +430,5 @@ workflows:
           requires: [run-migrations]
       - smoke-test:
           requires: [deploy-backend, deploy-frontend]
+      - cloudfront-update:
+          requires: [smoke-test]
