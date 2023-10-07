@@ -2,13 +2,13 @@ URL1:Github Repo
 https://github.com/nampt97/cdond-c3-projectstarter
 
 URL2:S3 Bucket 
-http://udapeople-fd6a8be.s3.amazonaws.com/index.html#/employees
+http://udapeople-78e01d3.s3.amazonaws.com/index.html#/employees
 
 URL3:CloudFront distribution
-http://d3phwxdnfxkxr9.cloudfront.net/#/employees
+http://d22ujd0kps2feo.cloudfront.net/#/employees
 
 URL4:Deployed application back-end URL
-http://ec2-3-92-63-174.compute-1.amazonaws.com:3030/
+http://ec2-3-85-52-180.compute-1.amazonaws.com/:3030/
 
 URL5:Prometheus Server URL
-http://ec2-18-232-111-185.compute-1.amazonaws.com:9090/
+http://ec2-54-167-220-130.compute-1.amazonaws.com:9090/
